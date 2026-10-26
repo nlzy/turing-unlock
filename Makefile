@@ -11,6 +11,9 @@ DKMSDIR    ?= /usr/src/turing-unlock-$(VERSION)
 FWDIR      ?= /usr/lib/firmware/turing-unlock/$(NV)
 LICENSEDIR ?= /usr/share/licenses
 PKG        ?= turing-unlock
+NVCC       ?= $(or $(shell command -v nvcc),/opt/cuda/bin/nvcc)
+GPU        ?= 0
+MIN_TFLOPS ?= 70
 
 MODULE_FILES   := $(filter-out %.mod.c,$(sort $(wildcard kernel/turing_unlock/*.[ch]))) \
                   kernel/turing_unlock/Kbuild kernel/turing_unlock/Makefile kernel/turing_unlock/dkms.conf
@@ -27,9 +30,18 @@ DEBS    := $(foreach p,dkms firmware,$(DEBDIR)/turing-unlock-$(p)_$(VERSION)_all
 
 .PHONY: all dist inputs firmware assets install-dkms install-firmware \
         install-mkinitcpio install-initramfs-tools install-dracut \
-        install-licenses arch deb rpm install install-arch install-deb install-rpm
+        install-licenses arch deb rpm bench install install-arch install-deb install-rpm
 
 all:
+
+# FP16 tensor GEMM on a card with the unlock applied (needs CUDA). GPU is a PCI
+# address or CUDA index; exits non-zero if it stays under MIN_TFLOPS.
+bench: $(DISTDIR)/gemm_fp16
+	$(DISTDIR)/gemm_fp16 -d $(GPU) --min-tflops $(MIN_TFLOPS)
+
+$(DISTDIR)/gemm_fp16: tests/gemm_fp16.cu
+	mkdir -p $(DISTDIR)
+	$(NVCC) -O2 -arch=sm_75 -o $@ $< -lcublas
 
 # Source-only release tarball; see .gitattributes for what is left out.
 dist:
