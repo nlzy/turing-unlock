@@ -22,6 +22,15 @@ Tested on the Dell RTX 2080 Ti 22GB (`10de:1e07`) with NVIDIA driver 575.51.03.
 Both the proprietary driver and the open driver work. Other cards or other driver
 is not tested.
 
+## Windows
+
+Windows is not covered by this module. Two independent community routes exist: a
+direct UEFI port of these modules
+([sargentmajord/Turing-GPU-UNLOCK](https://github.com/sargentmajord/Turing-GPU-UNLOCK)),
+and a pre-driver UEFI tool that covers Turing, Ampere and Ada before the driver
+loads ([physicsdolphin/nv-uefi-unlocker](https://github.com/physicsdolphin/nv-uefi-unlocker)).
+Neither is maintained here.
+
 ## Performance
 
 TFLOPS of cuBALS FP16 matrix multiply with FP32 Accumulate on RTX 2080 Ti @250W
